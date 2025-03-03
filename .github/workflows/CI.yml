@@ -4,7 +4,8 @@ name: CI
 
 on:
   push:
-    branches: [ main, mac-no-llvm ]
+    branches:
+      - '**'
   pull_request:
     branches: [ main ]
   schedule:
