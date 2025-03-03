@@ -9,6 +9,7 @@ const builtin = @import("builtin");
 
 const use_llvm_default = switch (builtin.os.tag) {
     .linux, .macos => false,
+    .windows => false,
     else => true,
 };
 
