@@ -13,10 +13,7 @@ on:
 
 jobs:
   build:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, Mac, windows-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: Mac
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
@@ -44,46 +41,3 @@ jobs:
         run: |
           cd demo
           zig build -Denvironment=testing jetzig:test
-
-      - name: Build artifacts
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: |
-          declare -a targets=("x86_64-windows" "x86_64-linux" "x86_64-macos" "aarch64-macos")
-          mkdir -p "artifacts/"
-          root=$(pwd)
-          cd cli
-          for target in "${targets[@]}"; do
-            mkdir -p $root/artifacts/$target
-            echo "Building target ${target}..."
-            if ! zig build -Dtarget=${target} -Doptimize=ReleaseSafe --prefix $root/artifacts/${target}/; then
-              exit 1
-            fi
-            sed -e '1,5d' < $root/README.md > $root/artifacts/${target}/README.md
-            cp $root/LICENSE $root/artifacts/${target}/
-          done
-          wait
-
-      - name: Upload artifacts Target Windows
-        if: ${{ matrix.os == 'ubuntu-latest' && !contains(fromJSON('["pull_request"]'), github.event_name) }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-windows
-          path: artifacts/x86_64-windows
-      - name: Upload artifacts Target Linux
-        if: ${{ matrix.os == 'ubuntu-latest' && !contains(fromJSON('["pull_request"]'), github.event_name) }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-linux
-          path: artifacts/x86_64-linux
-      - name: Upload artifacts Target MacOS
-        if: ${{ matrix.os == 'ubuntu-latest'  && !contains(fromJSON('["pull_request"]'), github.event_name) }} 
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-macos-x86
-          path: artifacts/x86_64-macos
-      - name: Upload artifacts Target MacOS 2
-        if: ${{ matrix.os == 'ubuntu-latest' && !contains(fromJSON('["pull_request"]'), github.event_name) }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-macos-aarch64
-          path: artifacts/aarch64-macos
